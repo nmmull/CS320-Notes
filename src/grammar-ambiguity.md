@@ -1,229 +1,400 @@
-# Formal Grammar
+# Ambiguity
 
-Most of us are likely familiar with grammar in the context of natural language.
-In a primary school English class, we might learn that we should use the artical "an" instead of "a" if its corresponding noun starts with a vowel sound, or that what follows a semicolon should be a independent clause (i.e., should be able to stand on its own as a complete sentences).
-These are examples of English *grammar rules*.
-
-Grammar, in broad strokes, refers to the rules which govern what constitutes a well-formed sentence in a given language, barring low-level syntactic concerns like spelling or white space.
-It is the concern of grammar to determine that
+As participants of language, we are no strangers to grammatical ambiguity.
+Take, for instance, the following sentence I've unapologetically snarfed from the Wikipedia article on [Syntactic Ambiguity](https://en.wikipedia.org/wiki/Syntactic_ambiguity).
 
 ```
-I taught the car in the refrigerator
+John saw the man on the mountain with the telescope
 ```
 
-makes grammatical sense and that
+Was John using the telescope?
+Was the man carrying the telescope?
+Are the multiple mountains, one of which has a telescope on it?
+
+The ambiguity exists because it is not clear what hierarchical structure should scaffold this sentence.
+Here are two options for the verb phrase in the sentence.
+
+![Option 1](images/ambiguous-1.png)
+
+Again, not a linguistic class, but it is enough to recognize that `with the telescope` is grouped alongside the verb phrase starting with `saw`, indicating that John was *using* the telescope.
+The other option (though not the *only* other option):
+
+![Option 2](images/ambiguous-2.png)
+
+The prepositional phrase `with the telescope` is grouped with `the man on the mountain`, indicating the man was *carrying* the telescope.
+
+The ambiguity comes from not being completely sure which parse tree to give to the sentence.
+That is, it comes from the fact that we have to experience language in a linear fashion, either by reading it or hearing it.
+If our interlocutor could *display* the parse tree of their statement (floating eerily in space before your eyes) there would be nothing to say of (grammatical) ambiguity.
+
+But this is not how we experience language (or how we write programs, for that matter).
+To drive the point home, there is a natural-enough looking grammar which recognizes the above sentence.
 
 ```
-I car teach refrigerator in there
+<s>  ::= <np> <vp>
+<vp> ::= <v> | <v> <np> | <v> <np> <pp>
+<pp> ::= <p> <np>
+<np> ::= <n> | <d> <n> | <np> <pp>
+<n>  ::= John | man | mountain | telescope
+<v>  ::= saw
+<d>  ::= the
+<p>  ::= on | with
 ```
 
-does not.
-It is *not* the concern of grammar to determine that the first sentence, though grammatical, has no reasonable interpretation in English (except, perhaps, in surrealist fiction).
+The ambiguity comes exactly from the fact that this grammar has two parse trees which recognize the same sentence; we don't know what structure to give the sentence.
+Or equivalently, since parse trees correspond to exactly one leftmost derivation (you should try to convince yourself of this), the ambiguity comes from there being multiple leftmost derivations.
 
-Programming languages─being themselves languages in their own right, albeit more stringent ones than natural languages─have their own grammars, i.e., rules for determining what counts as a well-formed program.
-Due to this requirement of grammatic precision, they tend to be called *formal grammars*.
-In OCaml
-```ocaml
-let f x = x + 1
-```
-is a well-formed program but
-```ocaml
-let f x = x 1 +
-```
-is not, because the rule for using the `+` operator is that its arguments appear to its left and its right.
-That is, it is an *infix operator* (it can be used as a prefix operator if put in parentheses, e.g. `(+) x 1`, but it cannot in any circumstances be used as a postfix operator).
-We will discuss fixity in more detail later.
+> **Exercise.** Give two leftmost derivations of `John saw the man on the mountain with the telescope` in the above grammar.
 
-As in the case of natural language, grammars for programming languages are not concerned with the *meaning* of programs, just their well-formedness:
+Ambiguity in natural language is a complex topic, coming not just from parse-tree ambiguity, but also from the fact that defining a formal grammar for natural language is *hard* (perhaps impossible).
+But, restricted to the context of formal grammars, ambiguity has a wholly unambiguous definition.
+
+> **Definition.** A grammar is **ambiguous** there is a sentence it recognizes which has two distinct parse trees.
+> Equivalently, it is ambiguous of there is a sentence it recognizes which has two distinct leftmost derivations.
+
+Thus, the above grammar is ambiguous in the formal sense of the word.
+
+More to the point, consider the following grammar which may be seen as a prototype of a grammar for arithmetic expressions (something we will probably want if we're to give a grammar for a programming language).
 
 ```
-let omega x = x x
+<expr> ::= <var> | <expr> <op> <expr>
+<op>   ::= + | - | * | /
+<var>  ::= x
 ```
 
-is a well-formed program in OCaml, but it does not type-check since the argument `x` is expected to be a function of type `'a -> 'b` as well as an argument of type `'a`, an impossibility in the type system of OCaml.
+This seems, ignoring obvious issues, a reasonable enough definition; *an expression is either a variable or a pair of expressions with an operator between them*.
+Note that the recursive nature of the first production rule means that this grammar recognizes an infinite number of sentence.
 
-If our goal is to interpret computer programs, then we have to understand formally─both theoretically and practically─the grammars describing the well-formed programs in those languages.
-This means being able to represent and interpret representations of formal grammars.
-The grammar of OCaml, for example, is given in its entirety in [The OCaml Manual](https://v2.ocaml.org/manual/expr.html).
-The hope is that, after these notes, you should be able to understand the specification given there.
+> **Exercise.** Give a leftmost a derivation of `x * x + x * x` in the above grammar.
 
-Placing this in the pipeline of interpretation we discussed in the previous chapter, grammar is used to represent the output of parsing (which we will take up in the following chapter).
-As a reminder, a stream of tokens is parsed into a *parse tree*, a hierarchical structure which describes the way the program is formally composed.
-As we saw, it is easier to determine the meaning of a program (i.e., to interpret it) given its hierarchical structure as opposed to its linear form as a stream of tokens.
-
-This is another way of conceptualizing the role of grammar: it determines the hierarchical structure of a sentence.
-A sentence may be considered well-formed if it can constructed as well-formed parse tree, e.g.
-
-![Parse Tree for the above English sentence.](images/parse-tree.png)
-
-Its not important that you know/remember exactly what you each of the abbreviations in the above image stand for (this is not a linguistics course or an English grammar course) but hopefully the structure aligns with your intuition about how words in the sentences are grouped.
-
-### Summary
-In the remainder of these notes we will:
-
-* define *Backus-Naur Form*, a way of specifying so-called *context-free grammars*, which we will use to describe the grammars of programming languages;
-* discuss *ambiguity* in grammar and how to avoid it;
-* take a brief detour to talk about regular grammars and regular expressions;
-* cover implementation concerns, i.e., how this fits into the building of an interpreter;
-
-## Backus-Naur Form (BNF)
-
-Backus-Naur Form (BNF) specifications are used to describe what are called *context-free grammars*.
-Context-free grammars form a class of formal grammars which are sufficiently expressive to capture the grammars of most programming languages.
-We will be using BNF specifications to describe the rules which determine well-formed programs in programming languages we aim to interpret.
-First, a toy example/thought experiment.
-
-### Thought Experiment
-
-Consider again the following English statement.
+But, with regards to ambiguity, we should already be wary of this grammar, in particular the first production rule.
+As soon as we've applied the (second alternative of) the first production rule twice we get:
 
 ```
-The dog jumped over the moon
+<expr>
+<expr> <op> <expr>
+<expr> <op> <expr> <op> <expr>
 ```
 
-Suppose we were to try to break down the cognitive process required to determine that this sentence is grammatical.
-We might first recognize that each word falls into a particular part of speech.
-We can represent this part of the process by replacing each word in the sentence with a symbol *standing for* the figure of speech for each word.
+For the third line, *which of the two `<expr>` symbols did we expand?*
+To make this concrete, here are two parse trees for the sentence `x + x + x`.
+
+![Ambiguous parse trees](images/ambig-parse.png)
+
+Corresponding to the following two leftmost derivations (the first for the tree on the left, the second for the tree on the right).
 
 ```
-<article> <noun> <verb> <prep> <article> <noun>
+<expr>
+<expr> <op> <expr>
+<var> <op> <expr>
+x <op> <expr>
+x + <expr>
+x + <expr> <op> <expr>
+x + <var> <op> <expr>
+x + x <op> <expr>
+x + x + <expr>
+x + x + <var>
+x + x + x
+
+<expr>
+<expr> <op> <expr>
+<expr> <op> <expr> <op> <expr>
+<var> <op> <expr> <op> <expr>
+x <op> <expr> <op> <expr>
+x + <expr> <op> <expr>
+x + <var> <op> <expr>
+x + x <op> <expr>
+x + x + <expr>
+x + x + <var>
+x + x + x
 ```
 
-We then might recognize some familiar patterns: the pattern `<article> <noun>` is used to determine or quantify a noun, so might mentally group these symbols (into what grammaticist calls a *nominal phrase* or *noun phrase*) and represent them by a new symbol.
+This demonstrates that the above grammar is ambiguous.
+
+> **Aside.** In this example, and many of the examples we will see, it will be fairly clear that the grammar is ambiguous.
+> As students of computer science, we might think it possible that we could write a *program* that can check for us if a grammar is ambiguous.
+> Unfortunately, this is impossible (not just very difficult, but *impossible*).
+> This is to say that determining if a context-free grammar is ambiguous is **undecidable** (a term worth looking up if this piques your interest).
+
+## Avoiding Ambiguity
+
+Our next task it to determine how to avoid this ambiguity, but first, *why should we care?*
+Natural language is ambiguous and we get along perfectly fine.
+Why should we go through this trouble to make sure grammars we design are unambiguous?
+
+It's a fair question; the way I see it, it's something of a promise that we make to the user of a programming language that we **never make unspoken assumptions about what a user meant when we read one of their programs.**
+To be fair, we try to do this with natural language too, but in communication, if a statement is ambiguous, we can usually just ask our interlocutor what they meant.
+We can't do this for a programming language (at least not yet), so instead we make it *impossible* for a sentence to have multiple meanings.
+
+> **Aside.** We see a similar phenomena in legal language, which tends to be grammatically sterile, and usually no fun to read (at least for me).
+
+### (Reverse) Polish Notation
+
+If our only concern is avoiding ambiguity, we can use *polish notation* or *reverse polish notation*.
+In polish notation, operators appear *before* all their arguments, e.g.,
 
 ```
-<noun phrase> <verb> <prep> <noun phrase>
+<expr> ::= <var> | <op> <expr> <expr>
+<op>   ::= + | - | * | /
+<var>  ::= x
 ```
 
-Then we might recognize that a preposition followed by a noun phrase is also single unit (e.g., "over the moon", "through the woods", and "behind the wall" are examples of *prepositional phrases*) which may represent as something like
+We won't dwell on this but it turns out this gives us an unambiguous grammar, we don't even need parentheses.
+
+And it's not difficult to imagine what reverse polish notation is: operators always appear *after* all their arguments.
+This is how early calculators (like the [HP 9100A Desktop Calculator](https://en.wikipedia.org/wiki/Hewlett-Packard_9100A), before my time) were designed.
+If you wanted to compute something `(2 + 3) * (4 - 5)`, you would *push* the values you want to apply operations to onto a *stack*, and then apply operations to the top elements of the stack, like so:
 
 ```
-<noun phrase> <verb> <prep phrase>
+STACK        RPN EXPRESSION
+2            2
+2 3          2 3
+5            2 3 +
+5 4          2 3 + 4
+5 4 5        2 3 + 4 5
+5 (-1)       2 3 + 4 5 -
+(-5)         2 3 + 4 5 - *
 ```
 
-and that a verb followed by a prepositional phrase is, again, a single unit (e.g., "ran to the car", "arose from bed") leaving us with
+So the sequence of tokens you end up typing into the calculator is an expression in reverse polish notation.
+
+> **Exercise.** Derive the sentence `+ * x * x - x x x x` in the above grammar.
+
+The obvious issue with (reverse) polish notation is that it is difficult to read.
+Imagine working with a language in which if-then-else logic had to be done like:
 
 ```
-<noun phrase> <verb phrase>
+IFTHENELSE
+  cond
+  IFTHENELSE
+    IFTHENELSE
+	  cond
+      ifcase
+	  elsecase
+    ifcase
+	elsecase
+  elsecase
 ```
 
-the canonical structure of a sentence: *a thing does a thing.*
-A bit hand-wavy, but this accounts roughly for what we do when we judge that the above sentence is grammatical.
+This is in part to say that what truly causes ambiguity in expressions is the *mixing* of operator *fixity*.
 
-Putting these steps in reverse order, and starting with a single symbol `<sentence>` we get something that looks like a "proof" that `the dog jumped over the moon` is a valid sentence.
+> **Definition.** The **fixity** of an operator refers to where the (syntactic components of an) operator is placed relative to its arguments.
+> There are four kinds of operator fixity.
+> * A **prefix** operator appears before its arguments. This is like function application in OCaml (e.g., `f x` or `not b`).
+> * A **postfix** operator appears after its arguments. This is like type constructor application in OCaml (e.g., `int list` or `bool option list`).
+> * An **infix** operator appears in between its arguments. This is like arithmetic operations we learn in primary school (e.g., `2 + 3` or `4 / 5`).
+> * A **mixfix** operator is an operator with multiple syntactic components which may appear as some combination of prefix, infix and postfix. This is like if-then-else expressions in OCaml (e.g., `if b then x else y`).
+
+So if we want to contend with operator fixity (i.e., we don't want *just* prefix or *just* postfix operators, as in polish notation or reverse polish notation) then we still have work to do to avoid ambiguity.
+
+### Parentheses
+
+Another simple solution is to surround applications of operations with parentheses:
 
 ```
-<sentence>
-<noun phrase>    <verb phrase>
-<noun phrase>    <verb> <prep phrase>
-<noun phrase>    <verb> <prep> <noun phrase>
-<article> <noun> <verb> <prep> <article> <noun>
-the       dog    jumped over   the       moon
+<expr> ::= <var> | ( <expr> <op> <expr> )
+<op>   ::= + | - | * | /
+<var>  ::= x
 ```
 
-And if we squint, we can see something that looks a bit like the tree above:
+It then becomes very clear in a derivation like
 
-![Another parse tree](images/parse-tree-2.png)
+```
+<expr>
+( <expr> <op> <expr> )
+( ( <expr> <op> <expr> ) <op> <expr> )
+```
 
-### Definitions
+which `<expr>` in the second line we expanded.
+But we run into a similar issue; *lots of parentheses are no fun to read.*
 
-A *formal grammar* is meant to model this cognitive process of classifying a sentence as grammatical by verifying that it has a reasonable hierarchical structure.
-In defining a formal grammar, we have to fix ourselves to a collection of symbols.
-These symbols are divided into two disjoint groups: the **terminal symbols** and the **non-terminal symbols**.
-Two persnickety but important details about symbols:
-* In what follows (and as above) we will always notate a non-terminal symbol by something of the form `<non-term>` (where we replace `non-term` with something more descriptive) and terminal symbols by any sequence of (typically) alphanumeric symbols (in particular, we will avoid using `<` and `>` in the notation of terminal symbols so as not to cause any confusion).
-* We typically will not state outright what the underlying symbols of a grammar are.
-  As we will see, it will be possible to determine what terminal and non-terminal symbols we are considering by looking at the BNF specification itself.
+> **Exercise.** Give a derivation of `( ( ( x * x ) * x ) + ( x / x ) )` in the above grammar.
 
+So, our real basic question is: **how do we avoid grammar while being able to mix operator fixities and not use so many parentheses?**
+And this question has a simple answer in theory: **make explicit assumptions about how operator arguments are grouped.**
+This will mean contending with two things: *associativity* and *precedence*.
 
-In the "proof" that we gave that `the dog jumped over the moon` was grammatical, we built a sequence of not-quite sentences, until the very last one which was an actual sentences. We call these not-quite sentences *sentential forms*.
+## Dealing with Associativity
 
-> **Definition.**
-> A **sentential form** is a sequence of symbols (terminal or non-terminal).
-> A **sentence** is a sequence of terminal symbols.
+Associativity refers to how arguments are grouped when we are given a sequence of applications of an infix operator in the absence of parentheses, e.g.,
 
-In the (reversed) process of building sentential forms, we replaced non-terminal symbols with sentential forms, e.g., we replaced `<noun phrase>` with `<article> <noun>`.
-A grammar is determined by what replacements we are allowed to do.
-> **Definition.** A **production rule** is an equation of the form
+```
+x + x + x + x
+```
+
+may be understood as any one of the following (among others):
+
+```
+(((x + x) + x) + x)
+(x + (x + (x + x)))
+((x + x) + (x + x))
+(x + ((x + x) + x))
+```
+
+> **Exercise.** Determine the number of ways the expression `x + x + x + x` can be parenthesized.
+
+In the case of addition (as we typically understand it) this point is somewhat moot.
+The order in which we group arguments does not affect the *value* of a sequence of additions.
+That is, addition is associative (a term whose meaning we may recall from our discussion of list folding).
+
+> **Definition.** An operator `#` is **associative** if
 > ```
-> <non-term> ::= SENTENTIAL-FORM
+> (a # b) # c = a # (b # c)
 > ```
-> where the left-hand side of the `::=` is a non-terminal symbol, and the right-hand side is a sentential form.
-> A **BNF specification** is a collection of production rules in which one rule is designated the **starting symbol**.
+> for any values `a`, `b`, and `c` for which the above two expressions are defined.
 
-We read a production rule as saying "The non-terminal symbol on the left-hand side can be replaced with the sentential form on the right hand side".
-In these notes, the start rule will be designated as the first rule appearing in a specification.
+But not all operators are associative.
+Take division for example.
+We need to decide how to implicitly parenthesize an expression like `a / b / c / d`.
+Again, we could try to bar the ability to write an expression like this, but we might rather avoid using parentheses if possible.
 
-The following is an example of a grammar which we will show to *recognize* the sentence above.
-```
-<sentence>    ::= <noun phrase> <verb phrase>
-<verb-phrase> ::= <verb> <prep phrase>
-<verb-phrase> ::= <verb>
-<prep-phrase> ::= <prep> <noun phrase>
-<noun-phrase> ::= <article> <noun>
-<article>     ::= the
-<noun>        ::= cow
-<noun>        ::= moon
-<verb>        ::= jumped
-<prep>        ::= over
-```
+> **Exercise.** How does OCaml evaluate the expression `100 / 5 / 4`?
+> How are arguments grouped?
 
-Note that a non-terminal symbol can have multiple associated production rules.
-This is common enough that we have special syntax for this.
+For binary operators, we typically choose one of the first two choices in the list of parenthesizations above.
 
-> **Notation.** We will write
+> **Definition.** A operation `#` is said to be **left-associative** if sequences of applications of the operator are understood as grouping arguments from the left, i.e.,
 > ```
-> <non-term> ::= SENT-FORM-1 | SENT-FORM-2 | ... | SENT-FORM-n
+> a # b # c # d = (((a # b) # c) # d)
 > ```
-> as shorthand for
+> and is said to be **right-associative** if arguments are grouped from the right, i.e.,
 > ```
-> <non-term> ::= SENT-FORM-1
-> <non-term> ::= SENT-FORM-2
-> ...
-> <non-term> ::= SENT-FORM-n
+> a # b # c # d = (a # (b # (c # d)))
 > ```
-With this shorthand, we can simply the above grammar:
-```
-<sentence>    ::= <noun phrase> <verb phrase>
-<verb-phrase> ::= <verb> | <verb> <prep phrase>
-<prep-phrase> ::= <prep> <noun phrase>
-<noun-phrase> ::= <article> <noun>
-<article>     ::= the
-<noun>        ::= cow | moon
-<verb>        ::= jumped
-<prep>        ::= over
-```
 
-The last piece of the thought experiment above is the "proof" that the given sentence was grammatical.
-We codify this in the notion of a *derivation*.
+> **Remark.** Another option is that a binary operator can have no associativity.
+> It does not, for instance, make sense to apply a sequence of `=` operators in OCaml.
 
-> **Definition.** A **derivation** of a sentence `S` in a BNF grammar is a sequence of sentential forms with the following properties:
-> * it beginning with the start symbol
-> * it ends in `S`
-> * each sentential form is a the result of replacing *one of* the non-terminal symbols in the preceding sentence with a sentential form according to a production rule of the grammar.
+Bringing this back to grammatical ambiguity, giving a parenthesization of a sequence of operators means specifying a "shape" for the corresponding parse tree.
+For example, taking addition to be left-associative, i.e., taking `x + x + x` to mean `((x + x) + x)`, implies that, of the two parse trees for this sentence in the above image, the one on the *right* should be the "correct" one, **not** the one on the left.
+So: *can we update the grammar so that only the one on right can be constructed?*
 
-That's a bit of a mouthful, but it essentially restates the process in the thought experiment in a formal way.
-There is one deviation from the process above, included to make the definition easier to state: above we allowed ourselves to replace multiple non-terminal symbols simultaneously.
-A "correct" derivation would look like
+Let's take a simpler case first: consider another grammar, used to generate function types on integers in OCaml without parentheses.
+
 ```
-<sentence>
-<noun-phrase> <verb-phrase>
-<noun-phrase> <verb> <prep-phrase>
-<noun-phrase> <verb> <prep> <noun-phrase>
-<article> <noun> <verb> <prep> <noun-phrase>
-<article> <noun> <verb> <prep> <article> <noun>
-the <noun> <verb> <prep> <article> <noun>
-the dog <verb> <prep> <article> <noun>
-the dog jumped <prep> <article> <noun>
-the dog jumped over <article> <noun>
-the dog jumped over the <noun>
-the dog jumped over the moon
+<fun-type> ::= <int-type> | <fun-type> -> <fun-type>
+<int-type> ::= int
 ```
 
-## Ambiguity
+> **Exercise.** Give two leftmost derivations of `int -> int -> int` in the above grammar.
 
-## Extended BNF
+We might recall that function types are right associative, so we understand `int -> int -> int` to be parenthesized implicitly as `int -> (int -> int)`.
+The problem, as it stands, is that because of the production rule
 
-## Regular Grammars and Regular Expressions
+```
+<fun-type> ::= <fun-type> -> <fun-type>
+```
 
-## Implementation Concerns
+the argument type can an arbitrary complex function type.
+But we might recognize that, no matter how deep the nesting, the argument types have the special property in the case we assume right associativity: *they are it is always just `int`*.
+Therefore, we might consider the following updated grammar.
+
+```
+<fun-type> ::= <int-type> | <int-type> -> <fun-type>
+<int-type> ::= int
+```
+
+In this grammar, no matter how many times you apply the second alternative of the first production rule, the argument type is always just the `int` type.
+So we were, in fact, able to restrict the shape of the parse tree for sentences, by *breaking the symmetry* the production rule.
+
+> **Exercise.** Write the leftmost derivation of `int -> int -> int` in the above grammar, along with its parse tree.
+
+We'll come back to this, but first we have to recognize an issue with the example just given: there is only one operator.
+In the presence of multiple operators we have new issues to deal with.
+*How should `x * y + z` or `x + y - z` be implicitly parenthesized?*
+
+This is an issue of *precedence* or *order of operations* something probably already somewhat familiar with without necessarily knowing it.
+
+## Dealing with Precedence
+
+If you went through the American public school system then you probably learned the abbreviation PEMDAS (**P**arentheses, **E**xponentiation, **M**ultiplication, **D**ivision, **A**ddition, **S**ubtraction, along with an accompanying mnemonic, something like **P**lease **E**xcuse **M**y **D**ear **A**unt **S**ally).
+Focusing on just the last four letters for now, this rule tells us that we should group multiplications and divisions first, and then group addition and subtraction.
+That is to say, multiplication and division have greater *precedence* than addition and subtraction.
+
+> **Definition.** The **precedence** of an operator, relative to another operator, determines which operator binds more tightly, in the presents of ambiguity.
+
+> **Example.** The expression `2 * 3 + 4 * 5` should be implicitly parenthesized as `((2 * 3) + (4 * 5))` because multiplication binds tighter, it is considered first.
+
+Just as with associativity, the relative precedence of a collection of operators is about determining the shape of the parse tree we get when we generate the sentence with a grammar.
+To say that multiplication has higher precedence is to say that when we build the parse tree for `x * x + x`, we want `+` to be the top-level operation, at the root of the tree.
+
+> **Remark.** One thing that was probably glossed over if/when you learned PEMDAS: what do you do with something like `1 + 1 - 1 + 1`?
+> Do you group additions and then subtractions? Or vice versa?
+> The issue here is that addition and subtraction have the *same* precedence.
+> In this case, we will use the associativity of the operators to determine how to parenthesize: **given a sequences of operators of the same precedence, we use their associativity to group them.**
+>
+> Since addition and subtraction are both left-associative, this would be parenthesized as (((1 + 1) - 1) + 1).
+> Things can get *truly* complicated if you have two operators with the *same* precedence, but *different* associativity.
+> We will ignore this possibility in this course, but this really matters in languages like Haskell, in which users can define their own operators, with specified precedence and associativity.
+
+All of this is to say: in order to define an unambiguous grammar without parentheses, we need to know three things of each operator appearing in the grammar: **fixity**, **associativity**, and **precedence**.
+We can, for example, present the four basic arithmetic operators along with this information.
+It is typical to represent precedence by a positive integer, in which an operator has higher precedence than another if its precedence value is larger.
+
+| Operator | Fixity | Associativity | Precedence |
+|-|-|-|-|
+| `*` | infix | left | 2 |
+| `/` | infix | left | 2 |
+| `+` | infix | left | 1 |
+| `-` | infix | left | 1 |
+
+> **Remark.** This information is also available for all [OCaml operators](https://v2.ocaml.org/api/Ocaml_operators.html).
+
+With all this, we can now think about how to build an unambiguous grammar for arithmetic expressions.
+Just as with associativity, we need to recognize that a couple things:
+* Because of associativity, the right argument of multiplication or division must be a variable `x`.
+* Because of precedence, the left argument of multiplication or division must contain only multiplications and divisions.
+* Because of associativity, the right argument of addition or subtraction must be an expression with only multiplications and divisions.
+
+These observations yields the following grammar.
+I've tried to use suggestive names to indicate how the three points above manifest.
+
+```
+<expr>         ::= <only-mul-div> | <expr> <add-sub> <only-mul-div>
+<only-mul-div> ::= <var> | <only-mul-div> <mul-div> <var>
+<add-sub>      ::= + | -
+<mul-div>      ::= * | /
+<var>          ::= x
+```
+
+> **Exercise.** Give the leftmost derivation of `x * x + x * x` in the above grammar. Draw its parse tree
+
+Proving that this grammar is unambiguous is a bit tricky (we won't do this).
+It suffices to say that, given we know how to parenthesize such expressions, and this grammar captures the rules we use, it would seem to be ambiguous.
+
+## Parentheses (Again)
+
+We're not quite done.
+Without parentheses, we can't derive all expressions we might want to write down.
+Given the rules we've described above, we cannot write an expression (without parentheses) which is equivalent to `(x + x) + x`.
+To give a complete specification of the arithmetic expressions we know and love, we have to add back parentheses (this is the "P" part of PEMDAS).
+
+But where should we put parentheses into the grammar?
+As we saw above, if we put them everywhere, we get unnecessarily verbose sentences.
+Rather, it should be the case that: *it should be possible put **any** expression as an argument to operator if it is wrapped in parentheses.*
+For this we will replace `<var>` with something can also be any expression wrapped in parentheses.
+
+```
+<expr>          ::= <only-mul-div> | <expr> <add-sub> <only-mul-div>
+<only-mul-div>  ::= <var-or-parens> | <only-mul-div> <mul-div> <var-or-parens>
+<add-sub>       ::= + | -
+<mul-div>       ::= * | /
+<var-or-parens> ::= x | ( <expr> )
+```
+
+We might worry that now, it is again possible to have an arbitrary expression as an argument to an operator, but the point is that, if we do this, it must be wrapped in parentheses, which ensures unambiguity.
+
+> **Exercise.** Give a leftmost derivation of `( x + x ) * x` in the above grammar. Draw its parse tree.
+
+> **Exercise.** According to PEMDAS, we also need to handle exponentiation.
+> Give a grammar for arithmetic expressions including parentheses and exponentiation, using the following operator information.
+> | Operator | Fixity | Associativity | Precedence |
+> |-|-|-|-|
+> | `^` | infix | right | 3 |
+> | `*` | infix | left | 2 |
+> | `/` | infix | left | 2 |
+> | `+` | infix | left | 1 |
+> | `-` | infix | left | 1 |
+
+> **Exercise.** Write a grammar for Boolean expressions in Python.
+> You can check what sorts of expressions are allowed by using the Python interpreter.
