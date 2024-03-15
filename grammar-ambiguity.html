@@ -1,0 +1,573 @@
+<!DOCTYPE HTML>
+<html lang="en" class="light" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Ambiguity - CAS CS 320: Principles of Programming Languages</title>
+
+
+        <!-- Custom HTML head -->
+        
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="favicon.svg">
+        <link rel="shortcut icon" href="favicon.png">
+        <link rel="stylesheet" href="css/variables.css">
+        <link rel="stylesheet" href="css/general.css">
+        <link rel="stylesheet" href="css/chrome.css">
+        <link rel="stylesheet" href="css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="highlight.css">
+        <link rel="stylesheet" href="tomorrow-night.css">
+        <link rel="stylesheet" href="ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+    </head>
+    <body class="sidebar-visible no-js">
+    <div id="body-container">
+        <!-- Provide site root to javascript -->
+        <script>
+            var path_to_root = "";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+        </script>
+
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            var html = document.querySelector('html');
+            html.classList.remove('light')
+            html.classList.add(theme);
+            var body = document.querySelector('body');
+            body.classList.remove('no-js')
+            body.classList.add('js');
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            var body = document.querySelector('body');
+            var sidebar = null;
+            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+            }
+            sidebar_toggle.checked = sidebar === 'visible';
+            body.classList.remove('sidebar-visible');
+            body.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <div class="sidebar-scrollbox">
+                <ol class="chapter"><li class="chapter-item expanded affix "><a href="preface.html">Preface</a></li><li class="chapter-item expanded "><a href="intro.html"><strong aria-hidden="true">1.</strong> Introduction</a></li><li class="chapter-item expanded "><a href="grammar-intro.html"><strong aria-hidden="true">2.</strong> Formal Grammar</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="grammar-bnf.html"><strong aria-hidden="true">2.1.</strong> Backus-Naur Form</a></li><li class="chapter-item expanded "><a href="grammar-ambiguity.html" class="active"><strong aria-hidden="true">2.2.</strong> Ambiguity</a></li><li class="chapter-item expanded "><a href="grammar-ebnf.html"><strong aria-hidden="true">2.3.</strong> Extended BNF</a></li><li class="chapter-item expanded "><a href="grammar-regular.html"><strong aria-hidden="true">2.4.</strong> Regularity</a></li></ol></li><li class="chapter-item expanded "><a href="parsing.html"><strong aria-hidden="true">3.</strong> Parsing</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="parsing-grammar.html"><strong aria-hidden="true">3.1.</strong> Grammars as ADTs</a></li><li class="chapter-item expanded "><a href="parsing-combinators.html"><strong aria-hidden="true">3.2.</strong> Parser Combinators</a></li></ol></li><li class="chapter-item expanded "><a href="semantics.html"><strong aria-hidden="true">4.</strong> Formal Semantics</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="semantics-op.html"><strong aria-hidden="true">4.1.</strong> Operational Semantics</a></li></ol></li><li class="chapter-item expanded "><a href="variables.html"><strong aria-hidden="true">5.</strong> Variables</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="variables-scoping.html"><strong aria-hidden="true">5.1.</strong> Scoping</a></li><li class="chapter-item expanded "><a href="variables-binding.html"><strong aria-hidden="true">5.2.</strong> Binding</a></li></ol></li><li class="chapter-item expanded "><a href="subprograms.html"><strong aria-hidden="true">6.</strong> Subprograms</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="subprograms-ar.html"><strong aria-hidden="true">6.1.</strong> Activation Records</a></li><li class="chapter-item expanded "><a href="subprograms-as.html"><strong aria-hidden="true">6.2.</strong> Activation Stack</a></li></ol></li></ol>
+            </div>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <!-- Track and set sidebar scroll position -->
+        <script>
+            var sidebarScrollbox = document.querySelector('#sidebar .sidebar-scrollbox');
+            sidebarScrollbox.addEventListener('click', function(e) {
+                if (e.target.tagName === 'A') {
+                    sessionStorage.setItem('sidebar-scroll', sidebarScrollbox.scrollTop);
+                }
+            }, { passive: true });
+            var sidebarScrollTop = sessionStorage.getItem('sidebar-scroll');
+            sessionStorage.removeItem('sidebar-scroll');
+            if (sidebarScrollTop) {
+                // preserve sidebar scroll position when navigating via links within sidebar
+                sidebarScrollbox.scrollTop = sidebarScrollTop;
+            } else {
+                // scroll sidebar to current active section when navigating via "next/previous chapter" buttons
+                var activeSection = document.querySelector('#sidebar .active');
+                if (activeSection) {
+                    activeSection.scrollIntoView({ block: 'center' });
+                }
+            }
+        </script>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">CAS CS 320: Principles of Programming Languages</h1>
+
+                    <div class="right-buttons">
+                        <a href="print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="ambiguity"><a class="header" href="#ambiguity">Ambiguity</a></h1>
+<p>As participants of language, we are no strangers to grammatical ambiguity.
+Take, for instance, the following sentence I've unapologetically snarfed from the Wikipedia article on <a href="https://en.wikipedia.org/wiki/Syntactic_ambiguity">Syntactic Ambiguity</a>.</p>
+<pre><code>John saw the man on the mountain with the telescope
+</code></pre>
+<p>Was John using the telescope?
+Was the man carrying the telescope?
+Are the multiple mountains, one of which has a telescope on it?</p>
+<p>The ambiguity exists because it is not clear what hierarchical structure should scaffold this sentence.
+Here are two options for the verb phrase in the sentence.</p>
+<p><img src="images/ambiguous-1.png" alt="Option 1" /></p>
+<p>Again, not a linguistic class, but it is enough to recognize that <code>with the telescope</code> is grouped alongside the verb phrase starting with <code>saw</code>, indicating that John was <em>using</em> the telescope.
+The other option (though not the <em>only</em> other option):</p>
+<p><img src="images/ambiguous-2.png" alt="Option 2" /></p>
+<p>The prepositional phrase <code>with the telescope</code> is grouped with <code>the man on the mountain</code>, indicating the man was <em>carrying</em> the telescope.</p>
+<p>The ambiguity comes from not being completely sure which parse tree to give to the sentence.
+That is, it comes from the fact that we have to experience language in a linear fashion, either by reading it or hearing it.
+If our interlocutor could <em>display</em> the parse tree of their statement (floating eerily in space before your eyes) there would be nothing to say of (grammatical) ambiguity.</p>
+<p>But this is not how we experience language (or how we write programs, for that matter).
+To drive the point home, there is a natural-enough looking grammar which recognizes the above sentence.</p>
+<pre><code>&lt;s&gt;  ::= &lt;np&gt; &lt;vp&gt;
+&lt;vp&gt; ::= &lt;v&gt; | &lt;v&gt; &lt;np&gt; | &lt;v&gt; &lt;np&gt; &lt;pp&gt;
+&lt;pp&gt; ::= &lt;p&gt; &lt;np&gt;
+&lt;np&gt; ::= &lt;n&gt; | &lt;d&gt; &lt;n&gt; | &lt;np&gt; &lt;pp&gt;
+&lt;n&gt;  ::= John | man | mountain | telescope
+&lt;v&gt;  ::= saw
+&lt;d&gt;  ::= the
+&lt;p&gt;  ::= on | with
+</code></pre>
+<p>The ambiguity comes exactly from the fact that this grammar has two parse trees which recognize the same sentence; we don't know what structure to give the sentence.
+Or equivalently, since parse trees correspond to exactly one leftmost derivation (you should try to convince yourself of this), the ambiguity comes from there being multiple leftmost derivations.</p>
+<blockquote>
+<p><strong>Exercise.</strong> Give two leftmost derivations of <code>John saw the man on the mountain with the telescope</code> in the above grammar.</p>
+</blockquote>
+<p>Ambiguity in natural language is a complex topic, coming not just from parse-tree ambiguity, but also from the fact that defining a formal grammar for natural language is <em>hard</em> (perhaps impossible).
+But, restricted to the context of formal grammars, ambiguity has a wholly unambiguous definition.</p>
+<blockquote>
+<p><strong>Definition.</strong> A grammar is <strong>ambiguous</strong> there is a sentence it recognizes which has two distinct parse trees.
+Equivalently, it is ambiguous of there is a sentence it recognizes which has two distinct leftmost derivations.</p>
+</blockquote>
+<p>Thus, the above grammar is ambiguous in the formal sense of the word.</p>
+<p>More to the point, consider the following grammar which may be seen as a prototype of a grammar for arithmetic expressions (something we will probably want if we're to give a grammar for a programming language).</p>
+<pre><code>&lt;expr&gt; ::= &lt;var&gt; | &lt;expr&gt; &lt;op&gt; &lt;expr&gt;
+&lt;op&gt;   ::= + | - | * | /
+&lt;var&gt;  ::= x
+</code></pre>
+<p>This seems, ignoring obvious issues, a reasonable enough definition; <em>an expression is either a variable or a pair of expressions with an operator between them</em>.
+Note that the recursive nature of the first production rule means that this grammar recognizes an infinite number of sentence.</p>
+<blockquote>
+<p><strong>Exercise.</strong> Give a leftmost a derivation of <code>x * x + x * x</code> in the above grammar.</p>
+</blockquote>
+<p>But, with regards to ambiguity, we should already be wary of this grammar, in particular the first production rule.
+As soon as we've applied the (second alternative of) the first production rule twice we get:</p>
+<pre><code>&lt;expr&gt;
+&lt;expr&gt; &lt;op&gt; &lt;expr&gt;
+&lt;expr&gt; &lt;op&gt; &lt;expr&gt; &lt;op&gt; &lt;expr&gt;
+</code></pre>
+<p>For the third line, <em>which of the two <code>&lt;expr&gt;</code> symbols did we expand?</em>
+To make this concrete, here are two parse trees for the sentence <code>x + x + x</code>.</p>
+<p><img src="images/ambig-parse.png" alt="Ambiguous parse trees" /></p>
+<p>Corresponding to the following two leftmost derivations (the first for the tree on the left, the second for the tree on the right).</p>
+<pre><code>&lt;expr&gt;
+&lt;expr&gt; &lt;op&gt; &lt;expr&gt;
+&lt;var&gt; &lt;op&gt; &lt;expr&gt;
+x &lt;op&gt; &lt;expr&gt;
+x + &lt;expr&gt;
+x + &lt;expr&gt; &lt;op&gt; &lt;expr&gt;
+x + &lt;var&gt; &lt;op&gt; &lt;expr&gt;
+x + x &lt;op&gt; &lt;expr&gt;
+x + x + &lt;expr&gt;
+x + x + &lt;var&gt;
+x + x + x
+
+&lt;expr&gt;
+&lt;expr&gt; &lt;op&gt; &lt;expr&gt;
+&lt;expr&gt; &lt;op&gt; &lt;expr&gt; &lt;op&gt; &lt;expr&gt;
+&lt;var&gt; &lt;op&gt; &lt;expr&gt; &lt;op&gt; &lt;expr&gt;
+x &lt;op&gt; &lt;expr&gt; &lt;op&gt; &lt;expr&gt;
+x + &lt;expr&gt; &lt;op&gt; &lt;expr&gt;
+x + &lt;var&gt; &lt;op&gt; &lt;expr&gt;
+x + x &lt;op&gt; &lt;expr&gt;
+x + x + &lt;expr&gt;
+x + x + &lt;var&gt;
+x + x + x
+</code></pre>
+<p>This demonstrates that the above grammar is ambiguous.</p>
+<blockquote>
+<p><strong>Aside.</strong> In this example, and many of the examples we will see, it will be fairly clear that the grammar is ambiguous.
+As students of computer science, we might think it possible that we could write a <em>program</em> that can check for us if a grammar is ambiguous.
+Unfortunately, this is impossible (not just very difficult, but <em>impossible</em>).
+This is to say that determining if a context-free grammar is ambiguous is <strong>undecidable</strong> (a term worth looking up if this piques your interest).</p>
+</blockquote>
+<h2 id="avoiding-ambiguity"><a class="header" href="#avoiding-ambiguity">Avoiding Ambiguity</a></h2>
+<p>Our next task it to determine how to avoid this ambiguity, but first, <em>why should we care?</em>
+Natural language is ambiguous and we get along perfectly fine.
+Why should we go through this trouble to make sure grammars we design are unambiguous?</p>
+<p>It's a fair question; the way I see it, it's something of a promise that we make to the user of a programming language that we <strong>never make unspoken assumptions about what a user meant when we read one of their programs.</strong>
+To be fair, we try to do this with natural language too, but in communication, if a statement is ambiguous, we can usually just ask our interlocutor what they meant.
+We can't do this for a programming language (at least not yet), so instead we make it <em>impossible</em> for a sentence to have multiple meanings.</p>
+<blockquote>
+<p><strong>Aside.</strong> We see a similar phenomena in legal language, which tends to be grammatically sterile, and usually no fun to read (at least for me).</p>
+</blockquote>
+<h3 id="reverse-polish-notation"><a class="header" href="#reverse-polish-notation">(Reverse) Polish Notation</a></h3>
+<p>If our only concern is avoiding ambiguity, we can use <em>polish notation</em> or <em>reverse polish notation</em>.
+In polish notation, operators appear <em>before</em> all their arguments, e.g.,</p>
+<pre><code>&lt;expr&gt; ::= &lt;var&gt; | &lt;op&gt; &lt;expr&gt; &lt;expr&gt;
+&lt;op&gt;   ::= + | - | * | /
+&lt;var&gt;  ::= x
+</code></pre>
+<p>We won't dwell on this but it turns out this gives us an unambiguous grammar, we don't even need parentheses.</p>
+<p>And it's not difficult to imagine what reverse polish notation is: operators always appear <em>after</em> all their arguments.
+This is how early calculators (like the <a href="https://en.wikipedia.org/wiki/Hewlett-Packard_9100A">HP 9100A Desktop Calculator</a>, before my time) were designed.
+If you wanted to compute something <code>(2 + 3) * (4 - 5)</code>, you would <em>push</em> the values you want to apply operations to onto a <em>stack</em>, and then apply operations to the top elements of the stack, like so:</p>
+<pre><code>STACK        RPN EXPRESSION
+2            2
+2 3          2 3
+5            2 3 +
+5 4          2 3 + 4
+5 4 5        2 3 + 4 5
+5 (-1)       2 3 + 4 5 -
+(-5)         2 3 + 4 5 - *
+</code></pre>
+<p>So the sequence of tokens you end up typing into the calculator is an expression in reverse polish notation.</p>
+<blockquote>
+<p><strong>Exercise.</strong> Derive the sentence <code>+ * x * x - x x x x</code> in the above grammar.</p>
+</blockquote>
+<p>The obvious issue with (reverse) polish notation is that it is difficult to read.
+Imagine working with a language in which if-then-else logic had to be done like:</p>
+<pre><code>IFTHENELSE
+  cond
+  IFTHENELSE
+    IFTHENELSE
+	  cond
+      ifcase
+	  elsecase
+    ifcase
+	elsecase
+  elsecase
+</code></pre>
+<p>This is in part to say that what truly causes ambiguity in expressions is the <em>mixing</em> of operator <em>fixity</em>.</p>
+<blockquote>
+<p><strong>Definition.</strong> The <strong>fixity</strong> of an operator refers to where the (syntactic components of an) operator is placed relative to its arguments.
+There are four kinds of operator fixity.</p>
+<ul>
+<li>A <strong>prefix</strong> operator appears before its arguments. This is like function application in OCaml (e.g., <code>f x</code> or <code>not b</code>).</li>
+<li>A <strong>postfix</strong> operator appears after its arguments. This is like type constructor application in OCaml (e.g., <code>int list</code> or <code>bool option list</code>).</li>
+<li>An <strong>infix</strong> operator appears in between its arguments. This is like arithmetic operations we learn in primary school (e.g., <code>2 + 3</code> or <code>4 / 5</code>).</li>
+<li>A <strong>mixfix</strong> operator is an operator with multiple syntactic components which may appear as some combination of prefix, infix and postfix. This is like if-then-else expressions in OCaml (e.g., <code>if b then x else y</code>).</li>
+</ul>
+</blockquote>
+<p>So if we want to contend with operator fixity (i.e., we don't want <em>just</em> prefix or <em>just</em> postfix operators, as in polish notation or reverse polish notation) then we still have work to do to avoid ambiguity.</p>
+<h3 id="parentheses"><a class="header" href="#parentheses">Parentheses</a></h3>
+<p>Another simple solution is to surround applications of operations with parentheses:</p>
+<pre><code>&lt;expr&gt; ::= &lt;var&gt; | ( &lt;expr&gt; &lt;op&gt; &lt;expr&gt; )
+&lt;op&gt;   ::= + | - | * | /
+&lt;var&gt;  ::= x
+</code></pre>
+<p>It then becomes very clear in a derivation like</p>
+<pre><code>&lt;expr&gt;
+( &lt;expr&gt; &lt;op&gt; &lt;expr&gt; )
+( ( &lt;expr&gt; &lt;op&gt; &lt;expr&gt; ) &lt;op&gt; &lt;expr&gt; )
+</code></pre>
+<p>which <code>&lt;expr&gt;</code> in the second line we expanded.
+But we run into a similar issue; <em>lots of parentheses are no fun to read.</em></p>
+<blockquote>
+<p><strong>Exercise.</strong> Give a derivation of <code>( ( ( x * x ) * x ) + ( x / x ) )</code> in the above grammar.</p>
+</blockquote>
+<p>So, our real basic question is: <strong>how do we avoid grammar while being able to mix operator fixities and not use so many parentheses?</strong>
+And this question has a simple answer in theory: <strong>make explicit assumptions about how operator arguments are grouped.</strong>
+This will mean contending with two things: <em>associativity</em> and <em>precedence</em>.</p>
+<h2 id="dealing-with-associativity"><a class="header" href="#dealing-with-associativity">Dealing with Associativity</a></h2>
+<p>Associativity refers to how arguments are grouped when we are given a sequence of applications of an infix operator in the absence of parentheses, e.g.,</p>
+<pre><code>x + x + x + x
+</code></pre>
+<p>may be understood as any one of the following (among others):</p>
+<pre><code>(((x + x) + x) + x)
+(x + (x + (x + x)))
+((x + x) + (x + x))
+(x + ((x + x) + x))
+</code></pre>
+<blockquote>
+<p><strong>Exercise.</strong> Determine the number of ways the expression <code>x + x + x + x</code> can be parenthesized.</p>
+</blockquote>
+<p>In the case of addition (as we typically understand it) this point is somewhat moot.
+The order in which we group arguments does not affect the <em>value</em> of a sequence of additions.
+That is, addition is associative (a term whose meaning we may recall from our discussion of list folding).</p>
+<blockquote>
+<p><strong>Definition.</strong> An operator <code>#</code> is <strong>associative</strong> if</p>
+<pre><code>(a # b) # c = a # (b # c)
+</code></pre>
+<p>for any values <code>a</code>, <code>b</code>, and <code>c</code> for which the above two expressions are defined.</p>
+</blockquote>
+<p>But not all operators are associative.
+Take division for example.
+We need to decide how to implicitly parenthesize an expression like <code>a / b / c / d</code>.
+Again, we could try to bar the ability to write an expression like this, but we might rather avoid using parentheses if possible.</p>
+<blockquote>
+<p><strong>Exercise.</strong> How does OCaml evaluate the expression <code>100 / 5 / 4</code>?
+How are arguments grouped?</p>
+</blockquote>
+<p>For binary operators, we typically choose one of the first two choices in the list of parenthesizations above.</p>
+<blockquote>
+<p><strong>Definition.</strong> A operation <code>#</code> is said to be <strong>left-associative</strong> if sequences of applications of the operator are understood as grouping arguments from the left, i.e.,</p>
+<pre><code>a # b # c # d = (((a # b) # c) # d)
+</code></pre>
+<p>and is said to be <strong>right-associative</strong> if arguments are grouped from the right, i.e.,</p>
+<pre><code>a # b # c # d = (a # (b # (c # d)))
+</code></pre>
+</blockquote>
+<blockquote>
+<p><strong>Remark.</strong> Another option is that a binary operator can have no associativity.
+It does not, for instance, make sense to apply a sequence of <code>=</code> operators in OCaml.</p>
+</blockquote>
+<p>Bringing this back to grammatical ambiguity, giving a parenthesization of a sequence of operators means specifying a "shape" for the corresponding parse tree.
+For example, taking addition to be left-associative, i.e., taking <code>x + x + x</code> to mean <code>((x + x) + x)</code>, implies that, of the two parse trees for this sentence in the above image, the one on the <em>right</em> should be the "correct" one, <strong>not</strong> the one on the left.
+So: <em>can we update the grammar so that only the one on right can be constructed?</em></p>
+<p>Let's take a simpler case first: consider another grammar, used to generate function types on integers in OCaml without parentheses.</p>
+<pre><code>&lt;fun-type&gt; ::= &lt;int-type&gt; | &lt;fun-type&gt; -&gt; &lt;fun-type&gt;
+&lt;int-type&gt; ::= int
+</code></pre>
+<blockquote>
+<p><strong>Exercise.</strong> Give two leftmost derivations of <code>int -&gt; int -&gt; int</code> in the above grammar.</p>
+</blockquote>
+<p>We might recall that function types are right associative, so we understand <code>int -&gt; int -&gt; int</code> to be parenthesized implicitly as <code>int -&gt; (int -&gt; int)</code>.
+The problem, as it stands, is that because of the production rule</p>
+<pre><code>&lt;fun-type&gt; ::= &lt;fun-type&gt; -&gt; &lt;fun-type&gt;
+</code></pre>
+<p>the argument type can an arbitrary complex function type.
+But we might recognize that, no matter how deep the nesting, the argument types have the special property in the case we assume right associativity: <em>they are it is always just <code>int</code></em>.
+Therefore, we might consider the following updated grammar.</p>
+<pre><code>&lt;fun-type&gt; ::= &lt;int-type&gt; | &lt;int-type&gt; -&gt; &lt;fun-type&gt;
+&lt;int-type&gt; ::= int
+</code></pre>
+<p>In this grammar, no matter how many times you apply the second alternative of the first production rule, the argument type is always just the <code>int</code> type.
+So we were, in fact, able to restrict the shape of the parse tree for sentences, by <em>breaking the symmetry</em> the production rule.</p>
+<blockquote>
+<p><strong>Exercise.</strong> Write the leftmost derivation of <code>int -&gt; int -&gt; int</code> in the above grammar, along with its parse tree.</p>
+</blockquote>
+<p>We'll come back to this, but first we have to recognize an issue with the example just given: there is only one operator.
+In the presence of multiple operators we have new issues to deal with.
+<em>How should <code>x * y + z</code> or <code>x + y - z</code> be implicitly parenthesized?</em></p>
+<p>This is an issue of <em>precedence</em> or <em>order of operations</em> something probably already somewhat familiar with without necessarily knowing it.</p>
+<h2 id="dealing-with-precedence"><a class="header" href="#dealing-with-precedence">Dealing with Precedence</a></h2>
+<p>If you went through the American public school system then you probably learned the abbreviation PEMDAS (<strong>P</strong>arentheses, <strong>E</strong>xponentiation, <strong>M</strong>ultiplication, <strong>D</strong>ivision, <strong>A</strong>ddition, <strong>S</strong>ubtraction, along with an accompanying mnemonic, something like <strong>P</strong>lease <strong>E</strong>xcuse <strong>M</strong>y <strong>D</strong>ear <strong>A</strong>unt <strong>S</strong>ally).
+Focusing on just the last four letters for now, this rule tells us that we should group multiplications and divisions first, and then group addition and subtraction.
+That is to say, multiplication and division have greater <em>precedence</em> than addition and subtraction.</p>
+<blockquote>
+<p><strong>Definition.</strong> The <strong>precedence</strong> of an operator, relative to another operator, determines which operator binds more tightly, in the presents of ambiguity.</p>
+</blockquote>
+<blockquote>
+<p><strong>Example.</strong> The expression <code>2 * 3 + 4 * 5</code> should be implicitly parenthesized as <code>((2 * 3) + (4 * 5))</code> because multiplication binds tighter, it is considered first.</p>
+</blockquote>
+<p>Just as with associativity, the relative precedence of a collection of operators is about determining the shape of the parse tree we get when we generate the sentence with a grammar.
+To say that multiplication has higher precedence is to say that when we build the parse tree for <code>x * x + x</code>, we want <code>+</code> to be the top-level operation, at the root of the tree.</p>
+<blockquote>
+<p><strong>Remark.</strong> One thing that was probably glossed over if/when you learned PEMDAS: what do you do with something like <code>1 + 1 - 1 + 1</code>?
+Do you group additions and then subtractions? Or vice versa?
+The issue here is that addition and subtraction have the <em>same</em> precedence.
+In this case, we will use the associativity of the operators to determine how to parenthesize: <strong>given a sequences of operators of the same precedence, we use their associativity to group them.</strong></p>
+<p>Since addition and subtraction are both left-associative, this would be parenthesized as (((1 + 1) - 1) + 1).
+Things can get <em>truly</em> complicated if you have two operators with the <em>same</em> precedence, but <em>different</em> associativity.
+We will ignore this possibility in this course, but this really matters in languages like Haskell, in which users can define their own operators, with specified precedence and associativity.</p>
+</blockquote>
+<p>All of this is to say: in order to define an unambiguous grammar without parentheses, we need to know three things of each operator appearing in the grammar: <strong>fixity</strong>, <strong>associativity</strong>, and <strong>precedence</strong>.
+We can, for example, present the four basic arithmetic operators along with this information.
+It is typical to represent precedence by a positive integer, in which an operator has higher precedence than another if its precedence value is larger.</p>
+<div class="table-wrapper"><table><thead><tr><th>Operator</th><th>Fixity</th><th>Associativity</th><th>Precedence</th></tr></thead><tbody>
+<tr><td><code>*</code></td><td>infix</td><td>left</td><td>2</td></tr>
+<tr><td><code>/</code></td><td>infix</td><td>left</td><td>2</td></tr>
+<tr><td><code>+</code></td><td>infix</td><td>left</td><td>1</td></tr>
+<tr><td><code>-</code></td><td>infix</td><td>left</td><td>1</td></tr>
+</tbody></table>
+</div>
+<blockquote>
+<p><strong>Remark.</strong> This information is also available for all <a href="https://v2.ocaml.org/api/Ocaml_operators.html">OCaml operators</a>.</p>
+</blockquote>
+<p>With all this, we can now think about how to build an unambiguous grammar for arithmetic expressions.
+Just as with associativity, we need to recognize that a couple things:</p>
+<ul>
+<li>Because of associativity, the right argument of multiplication or division must be a variable <code>x</code>.</li>
+<li>Because of precedence, the left argument of multiplication or division must contain only multiplications and divisions.</li>
+<li>Because of associativity, the right argument of addition or subtraction must be an expression with only multiplications and divisions.</li>
+</ul>
+<p>These observations yields the following grammar.
+I've tried to use suggestive names to indicate how the three points above manifest.</p>
+<pre><code>&lt;expr&gt;         ::= &lt;only-mul-div&gt; | &lt;expr&gt; &lt;add-sub&gt; &lt;only-mul-div&gt;
+&lt;only-mul-div&gt; ::= &lt;var&gt; | &lt;only-mul-div&gt; &lt;mul-div&gt; &lt;var&gt;
+&lt;add-sub&gt;      ::= + | -
+&lt;mul-div&gt;      ::= * | /
+&lt;var&gt;          ::= x
+</code></pre>
+<blockquote>
+<p><strong>Exercise.</strong> Give the leftmost derivation of <code>x * x + x * x</code> in the above grammar. Draw its parse tree</p>
+</blockquote>
+<p>Proving that this grammar is unambiguous is a bit tricky (we won't do this).
+It suffices to say that, given we know how to parenthesize such expressions, and this grammar captures the rules we use, it would seem to be ambiguous.</p>
+<h2 id="parentheses-again"><a class="header" href="#parentheses-again">Parentheses (Again)</a></h2>
+<p>We're not quite done.
+Without parentheses, we can't derive all expressions we might want to write down.
+Given the rules we've described above, we cannot write an expression (without parentheses) which is equivalent to <code>(x + x) + x</code>.
+To give a complete specification of the arithmetic expressions we know and love, we have to add back parentheses (this is the "P" part of PEMDAS).</p>
+<p>But where should we put parentheses into the grammar?
+As we saw above, if we put them everywhere, we get unnecessarily verbose sentences.
+Rather, it should be the case that: <em>it should be possible put <strong>any</strong> expression as an argument to operator if it is wrapped in parentheses.</em>
+For this we will replace <code>&lt;var&gt;</code> with something can also be any expression wrapped in parentheses.</p>
+<pre><code>&lt;expr&gt;          ::= &lt;only-mul-div&gt; | &lt;expr&gt; &lt;add-sub&gt; &lt;only-mul-div&gt;
+&lt;only-mul-div&gt;  ::= &lt;var-or-parens&gt; | &lt;only-mul-div&gt; &lt;mul-div&gt; &lt;var-or-parens&gt;
+&lt;add-sub&gt;       ::= + | -
+&lt;mul-div&gt;       ::= * | /
+&lt;var-or-parens&gt; ::= x | ( &lt;expr&gt; )
+</code></pre>
+<p>We might worry that now, it is again possible to have an arbitrary expression as an argument to an operator, but the point is that, if we do this, it must be wrapped in parentheses, which ensures unambiguity.</p>
+<blockquote>
+<p><strong>Exercise.</strong> Give a leftmost derivation of <code>( x + x ) * x</code> in the above grammar. Draw its parse tree.</p>
+</blockquote>
+<blockquote>
+<p><strong>Exercise.</strong> According to PEMDAS, we also need to handle exponentiation.
+Give a grammar for arithmetic expressions including parentheses and exponentiation, using the following operator information.</p>
+<div class="table-wrapper"><table><thead><tr><th>Operator</th><th>Fixity</th><th>Associativity</th><th>Precedence</th></tr></thead><tbody>
+<tr><td><code>^</code></td><td>infix</td><td>right</td><td>3</td></tr>
+<tr><td><code>*</code></td><td>infix</td><td>left</td><td>2</td></tr>
+<tr><td><code>/</code></td><td>infix</td><td>left</td><td>2</td></tr>
+<tr><td><code>+</code></td><td>infix</td><td>left</td><td>1</td></tr>
+<tr><td><code>-</code></td><td>infix</td><td>left</td><td>1</td></tr>
+</tbody></table>
+</div></blockquote>
+<blockquote>
+<p><strong>Exercise.</strong> Write a grammar for Boolean expressions in Python.
+You can check what sorts of expressions are allowed by using the Python interpreter.</p>
+</blockquote>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="grammar-bnf.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="grammar-ebnf.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="grammar-bnf.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="grammar-ebnf.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+        <!-- Livereload script (if served using the cli tool) -->
+        <script>
+            const wsProtocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
+            const wsAddress = wsProtocol + "//" + location.host + "/" + "__livereload";
+            const socket = new WebSocket(wsAddress);
+            socket.onmessage = function (event) {
+                if (event.data === "reload") {
+                    socket.close();
+                    location.reload();
+                }
+            };
+
+            window.onbeforeunload = function() {
+                socket.close();
+            }
+        </script>
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="elasticlunr.min.js"></script>
+        <script src="mark.min.js"></script>
+        <script src="searcher.js"></script>
+
+        <script src="clipboard.min.js"></script>
+        <script src="highlight.js"></script>
+        <script src="book.js"></script>
+
+        <!-- Custom JS scripts -->
+
+
+    </div>
+    </body>
+</html>

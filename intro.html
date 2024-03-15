@@ -1,0 +1,297 @@
+<!DOCTYPE HTML>
+<html lang="en" class="light" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Introduction - CAS CS 320: Principles of Programming Languages</title>
+
+
+        <!-- Custom HTML head -->
+        
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="favicon.svg">
+        <link rel="shortcut icon" href="favicon.png">
+        <link rel="stylesheet" href="css/variables.css">
+        <link rel="stylesheet" href="css/general.css">
+        <link rel="stylesheet" href="css/chrome.css">
+        <link rel="stylesheet" href="css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="highlight.css">
+        <link rel="stylesheet" href="tomorrow-night.css">
+        <link rel="stylesheet" href="ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+    </head>
+    <body class="sidebar-visible no-js">
+    <div id="body-container">
+        <!-- Provide site root to javascript -->
+        <script>
+            var path_to_root = "";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+        </script>
+
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            var html = document.querySelector('html');
+            html.classList.remove('light')
+            html.classList.add(theme);
+            var body = document.querySelector('body');
+            body.classList.remove('no-js')
+            body.classList.add('js');
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            var body = document.querySelector('body');
+            var sidebar = null;
+            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+            }
+            sidebar_toggle.checked = sidebar === 'visible';
+            body.classList.remove('sidebar-visible');
+            body.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <div class="sidebar-scrollbox">
+                <ol class="chapter"><li class="chapter-item expanded affix "><a href="preface.html">Preface</a></li><li class="chapter-item expanded "><a href="intro.html" class="active"><strong aria-hidden="true">1.</strong> Introduction</a></li><li class="chapter-item expanded "><a href="grammar-intro.html"><strong aria-hidden="true">2.</strong> Formal Grammar</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="grammar-bnf.html"><strong aria-hidden="true">2.1.</strong> Backus-Naur Form</a></li><li class="chapter-item expanded "><a href="grammar-ambiguity.html"><strong aria-hidden="true">2.2.</strong> Ambiguity</a></li><li class="chapter-item expanded "><a href="grammar-ebnf.html"><strong aria-hidden="true">2.3.</strong> Extended BNF</a></li><li class="chapter-item expanded "><a href="grammar-regular.html"><strong aria-hidden="true">2.4.</strong> Regularity</a></li></ol></li><li class="chapter-item expanded "><a href="parsing.html"><strong aria-hidden="true">3.</strong> Parsing</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="parsing-grammar.html"><strong aria-hidden="true">3.1.</strong> Grammars as ADTs</a></li><li class="chapter-item expanded "><a href="parsing-combinators.html"><strong aria-hidden="true">3.2.</strong> Parser Combinators</a></li></ol></li><li class="chapter-item expanded "><a href="semantics.html"><strong aria-hidden="true">4.</strong> Formal Semantics</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="semantics-op.html"><strong aria-hidden="true">4.1.</strong> Operational Semantics</a></li></ol></li><li class="chapter-item expanded "><a href="variables.html"><strong aria-hidden="true">5.</strong> Variables</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="variables-scoping.html"><strong aria-hidden="true">5.1.</strong> Scoping</a></li><li class="chapter-item expanded "><a href="variables-binding.html"><strong aria-hidden="true">5.2.</strong> Binding</a></li></ol></li><li class="chapter-item expanded "><a href="subprograms.html"><strong aria-hidden="true">6.</strong> Subprograms</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="subprograms-ar.html"><strong aria-hidden="true">6.1.</strong> Activation Records</a></li><li class="chapter-item expanded "><a href="subprograms-as.html"><strong aria-hidden="true">6.2.</strong> Activation Stack</a></li></ol></li></ol>
+            </div>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <!-- Track and set sidebar scroll position -->
+        <script>
+            var sidebarScrollbox = document.querySelector('#sidebar .sidebar-scrollbox');
+            sidebarScrollbox.addEventListener('click', function(e) {
+                if (e.target.tagName === 'A') {
+                    sessionStorage.setItem('sidebar-scroll', sidebarScrollbox.scrollTop);
+                }
+            }, { passive: true });
+            var sidebarScrollTop = sessionStorage.getItem('sidebar-scroll');
+            sessionStorage.removeItem('sidebar-scroll');
+            if (sidebarScrollTop) {
+                // preserve sidebar scroll position when navigating via links within sidebar
+                sidebarScrollbox.scrollTop = sidebarScrollTop;
+            } else {
+                // scroll sidebar to current active section when navigating via "next/previous chapter" buttons
+                var activeSection = document.querySelector('#sidebar .active');
+                if (activeSection) {
+                    activeSection.scrollIntoView({ block: 'center' });
+                }
+            }
+        </script>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">CAS CS 320: Principles of Programming Languages</h1>
+
+                    <div class="right-buttons">
+                        <a href="print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="introduction"><a class="header" href="#introduction">Introduction</a></h1>
+<p>When we go to write a program in our favorite programming language (OCaml, I presume) we fill a file with a bunch of symbols and text.
+This is one of the beauties of programming: looking past the bells and whistles provided by editors and IDEs, a program is just a stream of characters.</p>
+<p>At some point in our programming workflow (hopefully not the very end) we want to verify that what we've written thus far actually works, so we <em>run</em> our program.
+In some IDEs, this literally means pressing a play button.
+For more down-to-earth setups, this might mean opening up a terminal and typing out a few commands.</p>
+<p>In either case, we are running a <em>different</em> program in order to run the program we've written (huh).
+Our goal is to understand what's going on here: <em>What is this program doing? How does it do it? What sorts of data structures does this program use? etc., etc.</em></p>
+<p>Our intuition should probably tell us this program is doing something fairly complicated.
+Just imagine how hard it is for us as humans (and, more specifically, students) to follow directions.
+How often do we find ourselves wishing we had read <em>all</em> the instructions before starting on some task (like we we're told to do)?</p>
+<p><strong>So, our basic question:</strong> <em>How do we get from that stream of symbols to the <strong>output</strong> of our program?</em></p>
+<h2 id="interpretation-vs-compilation"><a class="header" href="#interpretation-vs-compilation">Interpretation vs. Compilation</a></h2>
+<p>We start by making a loose but ultimately important distinction, that of <em>interpretation</em> versus <em>compilation</em>.
+At the risk of oversimplicating the issue, we will use the following definitions to distinguish between these two processes.</p>
+<blockquote>
+<p><strong>Interpretation</strong> is the process of of taking a source program and its input, and then running it immediately to get its output.</p>
+</blockquote>
+<p>In the case of compilation we're not immediately interested in the output of our program, but rather punt that concern to a different process.</p>
+<blockquote>
+<p><strong>Compilation</strong> is the process of taking a source program in a high-level language and then <em>translating it</em> into a program in a low-level language which can given input and run separately.</p>
+</blockquote>
+<p>These processes are often represented by the following ubiquitous (verging on patronizingly) simple diagrams.</p>
+<p><img src="images/interp.png" alt="Compilation" /></p>
+<p>Again, this is a loose distinction, e.g., there may be intermediate translations in the process of intepretation.
+We will look briefly at compilation towards the end of the course, but we start by focusing on interpretation.</p>
+<h2 id="pure-interpretation-pipeline"><a class="header" href="#pure-interpretation-pipeline">Pure Interpretation Pipeline</a></h2>
+<p>So, <em>what's happening inside an interpreter?</em>
+We start (as is typically the case) with a high-level diagram.
+We can think of this image as providing a window into the "Interpreter" box above.</p>
+<p><img src="images/interp-inner.png" alt="Interpreter Pipeline" /></p>
+<p>A lot to parse here (pun intended), but this also gives us an outline of what is to come in the remainder of these notes:</p>
+<ul>
+<li>
+<p>The first two boxes turn that sequences of characters we've written into something that is easy to evaluate, easy to "run".
+This part of intepretation is about the <em>form</em> (or <em>syntax</em>) of the program.
+We use <strong>Formal Grammars</strong> (Chapter 2) to represent this form, i.e., to describe the result of <strong>Parsing</strong> (Chapter 3).
+Just like natural language, programming languages are heirarchical, and representing that heirarchical structure explicitly will make it easier to evaluate the program.</p>
+</li>
+<li>
+<p>The next two boxes take the heirarchical structure gotten by analyzing the syntax of our program, and then evaluate it (run it) to get its output (possibly building an intermediate representation).
+This part of intperetation is about the <em>meaning</em> (or <em>semantics</em>) of the program.
+We use <strong>Formal Semantics</strong> (Chapter 4) to describe what it means to give a program this meaning.
+This is where we need to concern ourselves with how <strong>Variables</strong> (Chapter 5) are handled and how function calls are made (i.e., how <strong>Subprograms</strong> (Chapter 6) are run).</p>
+</li>
+</ul>
+<p>As we will see, some of these steps are skipped (with parser combinators, it is often possible to perform lexical analysis alongside parsing) or added to (by the end of the course, we will include a compilation step as part of semantic analysis).
+The hope is just that we are starting to think more carefully about what is going on when our programs are run.</p>
+<h2 id="whats-next"><a class="header" href="#whats-next">What's Next</a></h2>
+<p>Programming languages form is one of these topics that has incredibly deep implication both in theory and in practice.
+It will be important to us not just to think about how to implement an interpreter, but also about the underlying logical frameworks we need for programming languages to make sense.</p>
+<p>So there will be a frequent give-and-take here between theory and practice.
+Be prepared to do handwritten assignments (not quite proofs, but something akin to them) as well as programming assignments (i.e., building the components interpreter).</p>
+<p>We begin with the study of <strong>Formal Grammar</strong>, the basis of parsing (and also of theoretical linguistics).</p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="preface.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="grammar-intro.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="preface.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="grammar-intro.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+        <!-- Livereload script (if served using the cli tool) -->
+        <script>
+            const wsProtocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
+            const wsAddress = wsProtocol + "//" + location.host + "/" + "__livereload";
+            const socket = new WebSocket(wsAddress);
+            socket.onmessage = function (event) {
+                if (event.data === "reload") {
+                    socket.close();
+                    location.reload();
+                }
+            };
+
+            window.onbeforeunload = function() {
+                socket.close();
+            }
+        </script>
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="elasticlunr.min.js"></script>
+        <script src="mark.min.js"></script>
+        <script src="searcher.js"></script>
+
+        <script src="clipboard.min.js"></script>
+        <script src="highlight.js"></script>
+        <script src="book.js"></script>
+
+        <!-- Custom JS scripts -->
+
+
+    </div>
+    </body>
+</html>

@@ -1,0 +1,293 @@
+<!DOCTYPE HTML>
+<html lang="en" class="light" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Formal Grammar - CAS CS 320: Principles of Programming Languages</title>
+
+
+        <!-- Custom HTML head -->
+        
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="favicon.svg">
+        <link rel="shortcut icon" href="favicon.png">
+        <link rel="stylesheet" href="css/variables.css">
+        <link rel="stylesheet" href="css/general.css">
+        <link rel="stylesheet" href="css/chrome.css">
+        <link rel="stylesheet" href="css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="highlight.css">
+        <link rel="stylesheet" href="tomorrow-night.css">
+        <link rel="stylesheet" href="ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+    </head>
+    <body class="sidebar-visible no-js">
+    <div id="body-container">
+        <!-- Provide site root to javascript -->
+        <script>
+            var path_to_root = "";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+        </script>
+
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            var html = document.querySelector('html');
+            html.classList.remove('light')
+            html.classList.add(theme);
+            var body = document.querySelector('body');
+            body.classList.remove('no-js')
+            body.classList.add('js');
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            var body = document.querySelector('body');
+            var sidebar = null;
+            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+            }
+            sidebar_toggle.checked = sidebar === 'visible';
+            body.classList.remove('sidebar-visible');
+            body.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <div class="sidebar-scrollbox">
+                <ol class="chapter"><li class="chapter-item expanded affix "><a href="preface.html">Preface</a></li><li class="chapter-item expanded "><a href="intro.html"><strong aria-hidden="true">1.</strong> Introduction</a></li><li class="chapter-item expanded "><a href="grammar-intro.html" class="active"><strong aria-hidden="true">2.</strong> Formal Grammar</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="grammar-bnf.html"><strong aria-hidden="true">2.1.</strong> Backus-Naur Form</a></li><li class="chapter-item expanded "><a href="grammar-ambiguity.html"><strong aria-hidden="true">2.2.</strong> Ambiguity</a></li><li class="chapter-item expanded "><a href="grammar-ebnf.html"><strong aria-hidden="true">2.3.</strong> Extended BNF</a></li><li class="chapter-item expanded "><a href="grammar-regular.html"><strong aria-hidden="true">2.4.</strong> Regularity</a></li></ol></li><li class="chapter-item expanded "><a href="parsing.html"><strong aria-hidden="true">3.</strong> Parsing</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="parsing-grammar.html"><strong aria-hidden="true">3.1.</strong> Grammars as ADTs</a></li><li class="chapter-item expanded "><a href="parsing-combinators.html"><strong aria-hidden="true">3.2.</strong> Parser Combinators</a></li></ol></li><li class="chapter-item expanded "><a href="semantics.html"><strong aria-hidden="true">4.</strong> Formal Semantics</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="semantics-op.html"><strong aria-hidden="true">4.1.</strong> Operational Semantics</a></li></ol></li><li class="chapter-item expanded "><a href="variables.html"><strong aria-hidden="true">5.</strong> Variables</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="variables-scoping.html"><strong aria-hidden="true">5.1.</strong> Scoping</a></li><li class="chapter-item expanded "><a href="variables-binding.html"><strong aria-hidden="true">5.2.</strong> Binding</a></li></ol></li><li class="chapter-item expanded "><a href="subprograms.html"><strong aria-hidden="true">6.</strong> Subprograms</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="subprograms-ar.html"><strong aria-hidden="true">6.1.</strong> Activation Records</a></li><li class="chapter-item expanded "><a href="subprograms-as.html"><strong aria-hidden="true">6.2.</strong> Activation Stack</a></li></ol></li></ol>
+            </div>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <!-- Track and set sidebar scroll position -->
+        <script>
+            var sidebarScrollbox = document.querySelector('#sidebar .sidebar-scrollbox');
+            sidebarScrollbox.addEventListener('click', function(e) {
+                if (e.target.tagName === 'A') {
+                    sessionStorage.setItem('sidebar-scroll', sidebarScrollbox.scrollTop);
+                }
+            }, { passive: true });
+            var sidebarScrollTop = sessionStorage.getItem('sidebar-scroll');
+            sessionStorage.removeItem('sidebar-scroll');
+            if (sidebarScrollTop) {
+                // preserve sidebar scroll position when navigating via links within sidebar
+                sidebarScrollbox.scrollTop = sidebarScrollTop;
+            } else {
+                // scroll sidebar to current active section when navigating via "next/previous chapter" buttons
+                var activeSection = document.querySelector('#sidebar .active');
+                if (activeSection) {
+                    activeSection.scrollIntoView({ block: 'center' });
+                }
+            }
+        </script>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">CAS CS 320: Principles of Programming Languages</h1>
+
+                    <div class="right-buttons">
+                        <a href="print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="formal-grammar"><a class="header" href="#formal-grammar">Formal Grammar</a></h1>
+<p>Most of us are likely familiar with grammar in the context of natural language.
+In a primary school English class, we might learn that we should use the artical "an" instead of "a" if its corresponding noun starts with a vowel sound, or that what follows a semicolon should be a independent clause (i.e., should be able to stand on its own as a complete sentences).
+These are examples of English <em>grammar rules</em>.</p>
+<p>Grammar, in broad strokes, refers to the rules which govern what constitutes a well-formed sentence in a given language, barring low-level syntactic concerns like spelling or white space.
+It is the concern of grammar to determine that</p>
+<pre><code>I taught the car in the refrigerator
+</code></pre>
+<p>makes grammatical sense and that</p>
+<pre><code>I car teach refrigerator in there
+</code></pre>
+<p>does not.
+It is <em>not</em> the concern of grammar to determine that the first sentence, though grammatical, has no reasonable interpretation in English (except, perhaps, in surrealist fiction).</p>
+<p>Programming languages─being themselves languages in their own right, albeit more stringent ones than natural languages─have their own grammars, i.e., rules for determining what counts as a well-formed <em>program</em>.
+Due to the grammatic precision expected of programming languages (we don't want too much variation in what we are allowed to write as a valid program), these tend to be called <em>formal grammars</em>.</p>
+<blockquote>
+<p><strong>Example.</strong> In OCaml, the program</p>
+<pre><code class="language-ocaml">let f x = x + 1
+</code></pre>
+<p>is well-formed, but the program</p>
+<pre><code class="language-ocaml">let f x = x 1 +
+</code></pre>
+<p>is not, because the rule for using the <code>+</code> operator is that its arguments appear to its left and its right.
+That is, it is an <em>infix operator</em> (it can be used as a prefix operator if put in parentheses, e.g. <code>(+) x 1</code>, but it cannot in any circumstances be used as a postfix operator).
+We will discuss fixity in more detail later.</p>
+</blockquote>
+<p>As in the case of natural language, grammars for programming languages are not concerned with the <em>meaning</em> of programs, just their well-formedness. The program</p>
+<pre><code>let omega x = x x
+</code></pre>
+<p>is well-formed in OCaml, but it does not type-check since the argument <code>x</code> is expected to be a function of type <code>'a -&gt; 'b</code> as well as an argument of type <code>'a</code>, an impossibility in the type system of OCaml.</p>
+<p>If our goal is to interpret computer programs, then we have to understand formally─both theoretically and practically─the grammars describing the well-formed programs in those languages.
+This means being able to represent and interpret representations of formal grammars.
+The grammar of OCaml, for example, is given in its entirety in <a href="https://v2.ocaml.org/manual/expr.html">The OCaml Manual</a>.
+After going through this chapter, you should be able to intepret the specification given there.</p>
+<p>Placing this in the pipeline of interpretation we discussed in the previous chapter, grammar is used to represent the output of parsing (which we will take up in the following chapter).
+As a reminder, a stream of tokens is parsed into a <em>parse tree</em>, a hierarchical structure which describes the way the program is formally composed.
+As we mentioned before (and as we will come to later understand) it is easier to determine the meaning of a program (i.e., to interpret it) given its hierarchical structure as opposed to its linear form as a stream of tokens.</p>
+<blockquote>
+<p><strong>Remark.</strong> This is another way of conceptualizing the role of grammar: it determines the hierarchical structure of a sentence.
+A sentence may be considered well-formed if it can constructed as well-formed parse tree, e.g.</p>
+<p><img src="images/parse-tree.png" alt="Parse Tree for the above English sentence." /></p>
+</blockquote>
+<p>Its not important that you know/remember exactly what you each of the abbreviations in the above image stand for (this is not a linguistics course or an English grammar course) but hopefully the structure aligns with your intuition about how words in the sentences are grouped.</p>
+<h2 id="chapter-summary"><a class="header" href="#chapter-summary">Chapter Summary</a></h2>
+<p>In what follows, we will:</p>
+<ul>
+<li>define <em>Backus-Naur Form</em> specifications, a way of describing so-called <em>context-free grammars</em>, which we will use to present the grammars of programming languages;</li>
+<li>discuss <em>ambiguity</em> in grammar along with how to avoid it (and why);</li>
+<li>take a brief detour to talk about <em>regular grammars</em> and <em>regular expressions</em>.</li>
+</ul>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="intro.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="grammar-bnf.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="intro.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="grammar-bnf.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+        <!-- Livereload script (if served using the cli tool) -->
+        <script>
+            const wsProtocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
+            const wsAddress = wsProtocol + "//" + location.host + "/" + "__livereload";
+            const socket = new WebSocket(wsAddress);
+            socket.onmessage = function (event) {
+                if (event.data === "reload") {
+                    socket.close();
+                    location.reload();
+                }
+            };
+
+            window.onbeforeunload = function() {
+                socket.close();
+            }
+        </script>
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="elasticlunr.min.js"></script>
+        <script src="mark.min.js"></script>
+        <script src="searcher.js"></script>
+
+        <script src="clipboard.min.js"></script>
+        <script src="highlight.js"></script>
+        <script src="book.js"></script>
+
+        <!-- Custom JS scripts -->
+
+
+    </div>
+    </body>
+</html>

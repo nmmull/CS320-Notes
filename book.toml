@@ -1,6 +1,0 @@
-[book]
-authors = ["POPV"]
-language = "en"
-multilingual = false
-src = "src"
-title = "CAS CS 320: Principles of Programming Languages"
